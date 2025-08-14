@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover" />
 <title>Passcode — Minimal Black & White</title>
 <style>
 :root {
@@ -29,8 +29,10 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: none;
+  -ms-touch-action: none;
+  overscroll-behavior: none;
 }
-body { touch-action: none; }
 
 /* Container */
 .device {
@@ -171,8 +173,9 @@ body { touch-action: none; }
 </div>
 
 <script>
-// Prevent scrolling
+// Prevent scrolling & zooming
 document.body.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
+document.addEventListener('gesturestart', e => e.preventDefault());
 
 // Config
 const PASS_LEN = 6;
