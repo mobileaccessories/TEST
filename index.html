@@ -7,13 +7,14 @@
 <style>
 :root {
   --pass-len: 6;
-  --key-size: 60px;
-  --key-gap: 10px;
-  --dot-size: 10px;
-  --dot-gap: 12px;
+  --key-size: 70px;
+  --key-gap: 14px;
+  --dot-size: 12px;
+  --dot-gap: 16px;
   --bg: #ffffff;
   --fg: #000000;
   --muted: rgba(0,0,0,0.35);
+  --glass-blur: 20px;
 }
 
 /* Reset + prevent scroll */
@@ -29,33 +30,34 @@ html, body {
   align-items: center;
   justify-content: center;
   touch-action: none;
+  -ms-touch-action: none;
   overscroll-behavior: none;
 }
 
 /* Container */
 .device {
   width: 100vw;
-  max-width: 360px;
+  max-width: 420px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
 }
 
 /* Title + Subtitle */
 .title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
   text-align: center;
 }
 .subtitle {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   text-align: center;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* Dots */
@@ -63,7 +65,7 @@ html, body {
   display: flex;
   justify-content: center;
   gap: var(--dot-gap);
-  margin: 15px 0;
+  margin: 25px 0;
 }
 .dot {
   width: var(--dot-size);
@@ -81,10 +83,10 @@ html, body {
 /* Info text */
 .info {
   color: var(--muted);
-  font-size: 12px;
-  min-height: 18px;
+  font-size: 13px;
+  min-height: 20px;
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 /* Keypad */
@@ -94,7 +96,7 @@ html, body {
   grid-template-rows: repeat(4, var(--key-size));
   gap: var(--key-gap);
   justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 .key {
   width: var(--key-size);
@@ -113,13 +115,13 @@ html, body {
   background: rgba(0,0,0,0.15);
 }
 .num {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 500;
 }
 .letters {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--muted);
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* Bottom buttons */
@@ -131,11 +133,11 @@ html, body {
 }
 .btn-text {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
   background: rgba(0,0,0,0.05);
   border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -143,17 +145,17 @@ html, body {
 .btn-cancel { font-weight: 600; }
 
 /* Responsive adjustments for very small screens */
-@media (max-width: 320px) {
+@media (max-width: 360px) {
   :root {
-    --key-size: 50px;
-    --dot-size: 8px;
-    --dot-gap: 10px;
+    --key-size: 60px;
+    --dot-size: 10px;
+    --dot-gap: 12px;
   }
-  .num { font-size: 16px; }
-  .letters { font-size: 7px; }
-  .title { font-size: 18px; }
-  .subtitle, .info { font-size: 11px; }
-  .btn-text { font-size: 11px; padding: 5px 10px; }
+  .num { font-size: 18px; }
+  .letters { font-size: 8px; }
+  .title { font-size: 20px; }
+  .subtitle, .info { font-size: 12px; }
+  .btn-text { font-size: 12px; padding: 6px 12px; }
 }
 </style>
 </head>
