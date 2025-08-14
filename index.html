@@ -14,11 +14,16 @@
   --bg: #ffffff;
   --fg: #000000;
   --muted: rgba(0,0,0,0.35);
-  --glass-blur: 20px;
 }
 
-/* Reset + prevent scroll */
-* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+/* Reset + prevent scroll + disable selection */
+* { 
+  box-sizing:border-box; 
+  -webkit-tap-highlight-color:transparent; 
+  user-select: none; /* disable selection */
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
 html, body {
   height: 100%;
   margin: 0;
@@ -176,6 +181,15 @@ html, body {
 // Prevent scrolling & zooming
 document.body.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
 document.addEventListener('gesturestart', e => e.preventDefault());
+
+// Disable right-click, copy, select
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if(e.ctrlKey || e.metaKey || e.key==='F12') e.preventDefault(); // disable Ctrl/Cmd + keys
+});
 
 // Config
 const PASS_LEN = 6;
