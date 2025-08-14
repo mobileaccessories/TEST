@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Passcode — Mobile Friendly</title>
+<title>Passcode — Minimal Black & White</title>
 <style>
 :root {
   --pass-len: 6;
-  --key-size: 75px;
-  --key-gap: 18px;
-  --dot-size: 14px;
-  --dot-gap: 20px;
+  --key-size: 70px;
+  --key-gap: 14px;
+  --dot-size: 12px;
+  --dot-gap: 16px;
   --bg: #ffffff;
   --fg: #000000;
   --muted: rgba(0,0,0,0.35);
@@ -32,19 +32,20 @@ html, body {
 }
 body { touch-action: none; }
 
-/* Main container */
+/* Container */
 .device {
   width: 100vw;
+  max-width: 420px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
 }
 
-/* Title + subtitle */
+/* Title + Subtitle */
 .title {
   font-size: 22px;
   font-weight: 600;
@@ -62,7 +63,7 @@ body { touch-action: none; }
   display: flex;
   justify-content: center;
   gap: var(--dot-gap);
-  margin: 20px 0;
+  margin: 25px 0;
 }
 .dot {
   width: var(--dot-size);
@@ -74,7 +75,7 @@ body { touch-action: none; }
 }
 .dot.filled {
   background: var(--fg);
-  transform: scale(1.3);
+  transform: scale(1.2);
 }
 
 /* Info text */
@@ -86,7 +87,7 @@ body { touch-action: none; }
   margin-bottom: 20px;
 }
 
-/* Keypad grid */
+/* Keypad */
 .keypad {
   display: grid;
   grid-template-columns: repeat(3, var(--key-size));
@@ -104,14 +105,12 @@ body { touch-action: none; }
   justify-content: center;
   align-items: center;
   background: rgba(0,0,0,0.05);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   cursor: pointer;
   user-select: none;
-  transition: background 0.15s, transform 0.15s;
+  transition: background 0.15s;
 }
 .key:active {
   background: rgba(0,0,0,0.15);
-  transform: scale(0.95);
 }
 .num {
   font-size: 22px;
@@ -123,13 +122,12 @@ body { touch-action: none; }
   margin-top: 2px;
 }
 
-/* Bottom row buttons */
+/* Bottom buttons */
 .bottom-row {
   width: 100%;
   display: flex;
   justify-content: space-between;
   padding: 0 10px;
-  margin-top: 10px;
 }
 .btn-text {
   color: var(--muted);
@@ -139,20 +137,17 @@ body { touch-action: none; }
   padding: 8px 16px;
   border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s;
 }
-.btn-text:active { 
-  background: rgba(0,0,0,0.12);
-  color: rgba(0,0,0,0.7);
-}
+.btn-text:active { background: rgba(0,0,0,0.15); }
 .btn-cancel { font-weight: 600; }
 
-/* Small screen adjustments */
+/* Responsive adjustments for very small screens */
 @media (max-width: 360px) {
   :root {
     --key-size: 60px;
-    --dot-size: 12px;
-    --dot-gap: 14px;
+    --dot-size: 10px;
+    --dot-gap: 12px;
   }
   .num { font-size: 18px; }
   .letters { font-size: 8px; }
@@ -212,7 +207,7 @@ for(let i=0;i<9;i++){
   frag.appendChild(btn);
 }
 
-// Placeholder left
+// Placeholder left for bottom row
 frag.appendChild(document.createElement('div'));
 
 // 0 in center
