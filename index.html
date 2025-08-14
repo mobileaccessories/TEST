@@ -3,197 +3,176 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Passcode — iOS Style</title>
+<title>Passcode — Minimal Black & White</title>
 <style>
 :root {
-  --design-w: 393;
-  --scale: 1;
-  --bg: #f2f2f7;
-  --fg: #000;
-  --muted: rgba(0,0,0,0.3);
-  --dot-size: 14px;
-  --dot-gap: 18px;
   --pass-len: 6;
-  --key-size: 80px;
-  --key-gap: 16px;
-  --notch-w: 210px;
-  --notch-h: 34px;
-  --device-r: 40px;
-  --glass-blur: 30px;
+  --key-size: 70px;
+  --key-gap: 14px;
+  --dot-size: 12px;
+  --dot-gap: 16px;
+  --bg: #ffffff;
+  --fg: #000000;
+  --muted: rgba(0,0,0,0.35);
+  --glass-blur: 20px;
 }
 
 /* Reset + prevent scroll */
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{
-  height:100%;
-  margin:0;
-  font-family:-apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  -webkit-font-smoothing:antialiased;
-  overflow:hidden; /* prevent scrolling */
-  touch-action:none; /* optional: prevent touch scrolling */
-}
-body{display:flex;align-items:center;justify-content:center;padding:0;background:var(--bg);color:var(--fg)}
-
-/* Device frame */
-.device {
-  width: calc(var(--design-w) * var(--scale) * 1px);
-  max-width: 96vw;
-  min-width: 320px;
-  height: calc(860px * var(--scale));
-  border-radius: calc(var(--device-r) * var(--scale));
-  position: relative;
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: -apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   background: var(--bg);
-  padding-top: calc(44px * var(--scale));
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  color: var(--fg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body { touch-action: none; }
+
+/* Container */
+.device {
+  width: 100vw;
+  max-width: 420px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-/* Notch / lock */
-.notch {
-  position:absolute;
-  left:50%;
-  top: calc(8px * var(--scale));
-  transform:translateX(-50%);
-  width: calc(var(--notch-w) * var(--scale));
-  height: calc(var(--notch-h) * var(--scale));
-  background: rgba(0,0,0,0.06);
-  border-radius: calc(16px * var(--scale));
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* Title + Subtitle */
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
 }
-.lock-icon {
-  width: calc(16px * var(--scale));
-  height: calc(16px * var(--scale));
-  border-radius:3px;
-  background:#000;
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 4px;
 }
 
-/* Layout */
-.container {
-  width: min(92%, calc(360px * var(--scale)));
-  margin-top: calc(50px * var(--scale));
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:12px;
-}
-
-/* Titles and dots */
-.title { color:var(--fg); font-size: 20px; font-weight:600; text-align:center; }
-.subtitle { color: var(--muted); font-size: 13px; text-align:center; margin-top:2px; }
+/* Dots */
 .dots {
-  display:flex;
-  gap: calc(var(--dot-gap) * var(--scale));
-  margin-top: 20px;
-  justify-content:center;
+  display: flex;
+  justify-content: center;
+  gap: var(--dot-gap);
+  margin: 25px 0;
 }
 .dot {
   width: var(--dot-size);
   height: var(--dot-size);
   border-radius: 50%;
-  border: 1px solid rgba(0,0,0,0.2);
+  border: 1px solid var(--muted);
   background: transparent;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 .dot.filled {
   background: var(--fg);
-  transform: scale(1.1);
+  transform: scale(1.2);
 }
 
 /* Info text */
-.info { color:var(--muted); font-size: 13px; min-height:20px; margin-top:4px; text-align:center; }
+.info {
+  color: var(--muted);
+  font-size: 13px;
+  min-height: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-/* Keypad grid (3x4) */
+/* Keypad */
 .keypad {
-  margin-top: 30px;
-  display:grid;
+  display: grid;
   grid-template-columns: repeat(3, var(--key-size));
   grid-template-rows: repeat(4, var(--key-size));
   gap: var(--key-gap);
-  justify-content:center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 .key {
   width: var(--key-size);
   height: var(--key-size);
   border-radius: 50%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(0,0,0,0.1);
-  backdrop-filter: blur(var(--glass-blur));
-  cursor:pointer;
-  user-select:none;
-  font-family: -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.05);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
 }
-.key:active { background: rgba(255,255,255,0.3); }
-.num { font-size: 22px; font-weight:500; }
-.letters { font-size: 10px; color: var(--muted); margin-top:2px; }
+.key:active {
+  background: rgba(0,0,0,0.15);
+}
+.num {
+  font-size: 22px;
+  font-weight: 500;
+}
+.letters {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
 
 /* Bottom buttons */
 .bottom-row {
-  width:100%;
-  display:flex;
-  justify-content:space-between;
-  padding: 12px 8px;
-  margin-top: 14px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
 }
 .btn-text {
   color: var(--muted);
-  font-size:14px;
-  background: rgba(255,255,255,0.2);
-  border:none;
-  padding:8px 14px;
-  border-radius:12px;
-  cursor:pointer;
-  backdrop-filter: blur(12px);
+  font-size: 14px;
+  background: rgba(0,0,0,0.05);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
 }
-.btn-text:active { background: rgba(255,255,255,0.3); }
-.btn-cancel { font-weight:600; }
+.btn-text:active { background: rgba(0,0,0,0.15); }
+.btn-cancel { font-weight: 600; }
 
-/* Small screen scaling */
-@media (max-width:360px){
-  :root{
-    --key-size:65px;
-    --dot-size:12px;
-    --dot-gap:14px;
-    --pass-len:6;
+/* Responsive adjustments for very small screens */
+@media (max-width: 360px) {
+  :root {
+    --key-size: 60px;
+    --dot-size: 10px;
+    --dot-gap: 12px;
   }
-  .num{font-size:18px;}
-  .letters{font-size:8px;}
-  .title{font-size:18px;}
-  .subtitle{font-size:12px;}
-  .info{font-size:12px;}
-  .btn-text{font-size:13px; padding:6px 12px;}
+  .num { font-size: 18px; }
+  .letters { font-size: 8px; }
+  .title { font-size: 20px; }
+  .subtitle, .info { font-size: 12px; }
+  .btn-text { font-size: 12px; padding: 6px 12px; }
 }
 </style>
 </head>
 <body>
 <div class="device">
-  <div class="notch"><div class="lock-icon"></div></div>
-  <div class="container">
-    <div style="width:100%; text-align:center;">
-      <div class="title">Enter Passcode</div>
-      <div class="subtitle">Your passcode is required to access the QR scanner</div>
-      <div class="dots" id="dots"></div>
-      <div class="info" id="info">Tap the digits</div>
-    </div>
-    <div style="width:100%; display:flex; justify-content:center;">
-      <div class="keypad" id="keypad"></div>
-    </div>
-    <div class="bottom-row">
-      <button id="emergencyBtn" class="btn-text">Emergency</button>
-      <button id="cancelBtn" class="btn-text btn-cancel">Cancel</button>
-    </div>
+  <div class="title">Enter Passcode</div>
+  <div class="subtitle">Your passcode is required to access the QR scanner</div>
+  <div class="dots" id="dots"></div>
+  <div class="info" id="info">Tap the digits</div>
+  <div class="keypad" id="keypad"></div>
+  <div class="bottom-row">
+    <button id="emergencyBtn" class="btn-text">Emergency</button>
+    <button id="cancelBtn" class="btn-text btn-cancel">Cancel</button>
   </div>
 </div>
 
 <script>
-// Prevent touch scrolling (extra safety)
-document.body.addEventListener('touchmove', e => { e.preventDefault(); }, {passive:false});
+// Prevent scrolling
+document.body.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
 
 // Config
 const PASS_LEN = 6;
@@ -216,7 +195,6 @@ const KEYS = [
   {n:'7',l:'PQRS'},{n:'8',l:'TUV'},{n:'9',l:'WXYZ'},
   {n:'0',l:''} 
 ];
-
 const frag = document.createDocumentFragment();
 
 // Numbers 1-9
