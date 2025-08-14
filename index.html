@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Passcode — iOS Style</title>
+<style>
+:root {
+  --design-w: 393;
+  --scale: 1;
+  --bg: #f2f2f7;
+  --fg: #000;
+  --muted: rgba(0,0,0,0.3);
+  --dot-size: 14px;
+  --dot-gap: 18px;
+  --pass-len: 6;
+  --key-size: 80px;
+  --key-gap: 16px;
+  --notch-w: 210px;
+  --notch-h: 34px;
+  --device-r: 40px;
+  --glass-blur: 30px;
+}
+
+/* Reset */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;font-family:-apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body{display:flex;align-items:center;justify-content:center;padding:0;background:var(--bg);color:var(--fg)}
+
+/* Device frame */
+.device {
+  width: calc(var(--design-w) * var(--scale) * 1px);
+  max-width: 96vw;
+  height: calc(860px * var(--scale));
+  border-radius: calc(var(--device-r) * var(--scale));
+  position: relative;
+  background: var(--bg);
+  padding-top: calc(44px * var(--scale));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* Notch / lock */
+.notch {
+  position:absolute;
+  left:50%;
+  top: calc(8px * var(--scale));
+  transform:translateX(-50%);
+  width: calc(var(--notch-w) * var(--scale));
+  height: calc(var(--notch-h) * var(--scale));
+  background: rgba(0,0,0,0.06);
+  border-radius: calc(16px * var(--scale));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.lock-icon {
+  width: calc(16px * var(--scale));
+  height: calc(16px * var(--scale));
+  border-radius:3px;
+  background:#000;
+}
+
+/* Layout */
+.container {
+  width: min(92%, calc(360px * var(--scale)));
+  margin-top: calc(60px * var(--scale));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+
+/* Titles and dots */
+.title { color:var(--fg); font-size: 22px; font-weight:600; text-align:center; }
+.subtitle { color: var(--muted); font-size: 14px; text-align:center; margin-top:2px; }
+.dots {
+  display:flex;
+  gap: calc(var(--dot-gap) * var(--scale));
+  margin-top: 24px;
+  justify-content:center;
+}
+.dot {
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: transparent;
+  transition: transform 0.15s ease;
+}
+.dot.filled {
+  background: var(--fg);
+  transform: scale(1.1);
+}
+
+/* Info text */
+.info { color:var(--muted); font-size: 14px; min-height:20px; margin-top:6px; text-align:center; }
+
+/* Keypad grid (3x4 for perfect centering) */
+.keypad {
+  margin-top: 36px;
+  display:grid;
+  grid-template-columns: repeat(3, var(--key-size));
+  grid-template-rows: repeat(4, var(--key-size));
+  gap: var(--key-gap);
+  justify-content:center;
+}
+.key {
+  width: var(--key-size);
+  height: var(--key-size);
+  border-radius: 50%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(0,0,0,0.1);
+  backdrop-filter: blur(var(--glass-blur));
+  cursor:pointer;
+  user-select:none;
+  font-family: -apple-system, sans-serif;
+}
+.key:active { background: rgba(255,255,255,0.3); }
+.num { font-size: 22px; font-weight:500; }
+.letters { font-size: 10px; color: var(--muted); margin-top:2px; }
+
+/* Bottom buttons */
+.bottom-row {
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  padding: 16px 12px;
+  margin-top: 16px;
+}
+.btn-text {
+  color: var(--muted);
+  font-size:16px;
+  background: rgba(255,255,255,0.2);
+  border:none;
+  padding:10px 18px;
+  border-radius:12px;
+  cursor:pointer;
+  backdrop-filter: blur(12px);
+}
+.btn-text:active { background: rgba(255,255,255,0.3); }
+.btn-cancel { font-weight:600; }
+
+/* Small screen scaling */
+@media (max-width:360px){
+  :root{
+    --key-size:70px;
+    --dot-size:12px;
+    --dot-gap:14px;
+  }
+  .num{font-size:20px;}
+  .btn-text{font-size:14px; padding:8px 14px;}
+}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="notch"><div class="lock-icon"></div></div>
+  <div class="container">
+    <div style="width:100%; text-align:center;">
+      <div class="title">Enter Passcode</div>
+      <div class="subtitle">Your passcode is required to access the QR scanner</div>
+      <div class="dots" id="dots"></div>
+      <div class="info" id="info">Tap the digits</div>
+    </div>
+    <div style="width:100%; display:flex; justify-content:center;">
+      <div class="keypad" id="keypad"></div>
+    </div>
+    <div class="bottom-row">
+      <button id="emergencyBtn" class="btn-text">Emergency</button>
+      <button id="cancelBtn" class="btn-text btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Config
+const PASS_LEN = 6;
+const keypad = document.getElementById('keypad');
+const dots = document.getElementById('dots');
+const cancelBtn = document.getElementById('cancelBtn');
+let entry='';
+
+// Build dots
+for(let i=0;i<PASS_LEN;i++){
+  const d = document.createElement('div');
+  d.className='dot';
+  dots.appendChild(d);
+}
+
+// Keys
+const KEYS = [
+  {n:'1',l:''},{n:'2',l:'ABC'},{n:'3',l:'DEF'},
+  {n:'4',l:'GHI'},{n:'5',l:'JKL'},{n:'6',l:'MNO'},
+  {n:'7',l:'PQRS'},{n:'8',l:'TUV'},{n:'9',l:'WXYZ'},
+  {n:'0',l:''} 
+];
+
+const frag = document.createDocumentFragment();
+
+// First 9 numbers (1-9)
+for(let i=0;i<9;i++){
+  const k = KEYS[i];
+  const btn = document.createElement('button');
+  btn.type='button';
+  btn.className='key';
+  btn.innerHTML=`<div class="num">${k.n}</div><div class="letters">${k.l}</div>`;
+  frag.appendChild(btn);
+}
+
+// Add empty placeholders for spacing
+for(let i=0;i<1;i++){
+  const empty = document.createElement('div');
+  frag.appendChild(empty);
+}
+
+// Add 0 in center bottom
+const zeroKey = document.createElement('button');
+zeroKey.type='button';
+zeroKey.className='key';
+zeroKey.innerHTML=`<div class="num">0</div><div class="letters"></div>`;
+frag.appendChild(zeroKey);
+
+// Another empty placeholder
+const empty2 = document.createElement('div');
+frag.appendChild(empty2);
+
+keypad.appendChild(frag);
+
+// Update dots
+function updateDots(){
+  Array.from(dots.children).forEach((d,i)=>{
+    d.classList.toggle('filled', i<entry.length);
+  });
+}
+
+// Key input
+keypad.addEventListener('pointerdown', (ev)=>{
+  ev.preventDefault();
+  const btn = ev.target.closest('.key'); if(!btn) return;
+  const numEl = btn.querySelector('.num'); if(!numEl) return;
+  if(entry.length>=PASS_LEN) return;
+  entry += numEl.textContent;
+  updateDots();
+});
+
+// Cancel clears entry
+cancelBtn.addEventListener('pointerdown', (ev)=>{
+  ev.preventDefault();
+  entry='';
+  updateDots();
+});
+</script>
+</body>
+</html>
