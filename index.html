@@ -1,27 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Embedded Web App</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #fbfbfb;
-    }
-    iframe {
-      border: none;
-      width: 100%;
-      height: 100vh;
-    }
-  </style>
-</head>
-<body>
-  <iframe
-    src="https://script.google.com/macros/s/AKfycbxUF8mpyfzWv6m5B7un8amoGPJM5k-o01y9gDY6ZCVl-QY7ans95jqdzW7tVsGXpoePPw/exec?page=mark"
-    allow="camera; microphone"
-    sandbox="allow-scripts allow-same-origin allow-forms"
-  ></iframe>
-</body>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base target="_top" />
+    <style>
+      /* keep your existing styles (unchanged) */
+      * { box-sizing: border-box; }
+      html, body { margin:0; padding:0; font-family:'Segoe UI',sans-serif; background:#f9f9f9; }
+      body { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; height:100vh; padding-top:40px; }
+      h1 { font-size:2.2rem; font-weight:600; margin-bottom:2rem; color:#000; }
+      .form-box { width:320px; display:flex; flex-direction:column; align-items:center; }
+      .input-box { width:100%; margin-bottom:1rem; }
+      input { width:100%; padding:14px 18px; border:1px solid #ccc; border-radius:9999px; font-size:1rem; outline:none; background:#fff; }
+      input:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,0.3); }
+      button { width:100%; padding:14px 18px; background:#000; color:#fff; border:none; border-radius:9999px; font-size:1rem; cursor:pointer; }
+      button:hover { background:#222; }
+      #statusMessage { color:red; font-size:0.9rem; text-align:center; margin-bottom:1rem; display:none; }
+      .success { background:#e6f9ed; color:#1a7f37; border:1px solid #c3f2d4; }
+      .error { background:#fff0f0; color:#b10000; border:1px solid #f3cccc; }
+      #scanner-overlay { position:fixed; top:0; left:0; width:100vw; height:100vh; display:none; align-items:center; justify-content:center; z-index:1000; background:#f9f9fb; }
+      #reader { width:90vw; max-width:400px; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+      #cancelScanBtn { width:100%; bottom:25px; background:#ff4444; color:#fff; padding:10px 20px; font-size:1rem; font-weight:500; border-radius:9999px; border:none; cursor:pointer; }
+      #cancelScanBtn:hover { background:#cc0000; }
+      .fade-in { animation: fadeIn 0.12s ease-out; }
+      @keyframes fadeIn { from { opacity:0; transform:scale(0.98); } to { opacity:1; transform:scale(1); } }
+    </style>
+  </head>
+
+  <body>
+    <h1>Mark as Delivered</h1>
+
+    <div class="form-box fade-in">
+      <div class="input-box">
+        <input type="text" id="orderNumber" placeholder="Order Number (QR)" />
+      </div>
+
+      <div class="input-box">
+        <input type="text" id="accessCode" placeholder="Access Code" />
+      </div>
+
+      <input type="hidden" id="scanTime" />
+      <input type="hidden" id="locationData" />
+
+      <div class="input-box">
+        <button onclick="submitDelivery()">Submit</button>
+      </div>
+
+      <div class="input-box">
+        <button onclick="startScan()">Scan QR Code</button>
+      </div>
+
+      <div id="statusMessage"></div>
+    </div>
+
+    <div id="scanner-overlay">
+      <div id="reader" class="fade-in"></div>
+      <div style="width:90vw; max-width:400px; margin-top:12px;">
+        <button id="cancelScanBtn" onclick="cancelScan()">Cancel Scan</button>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+      let html5QrCode;
+
+      function showMessage(msg, type) {
+        const statusDiv = document.getElementById("statusMessage");
+        statusDiv.innerText = msg;
+        statusDiv.className = type;
+        statusDiv.style.display = 'block';
+        setTimeout(() => { statusDiv.style.display = 'none'; }, 4000);
+      }
+
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            position => {
+              const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+              document.getElementById("locationData").value = JSON.stringify(coords);
+            },
+            error => { /* non-fatal */ }
+          );
+        }
+      }
+
+      function startScan() {
+        document.getElementById('statusMessage').style.display = 'none';
+        document.getElementById('scanner-overlay').style.display = 'flex';
+
+        html5QrCode = new Html5Qrcode("reader");
+
+        Html5Qrcode.getCameras().then(devices => {
+          if (devices && devices.length) {
+            html5QrCode.start(
+              { facingMode: "environment" },
+              { fps: 10, qrbox: (w,h) => { const m = Math.min(w,h); return { width: m*0.9, height: m*0.9 }; } },
+              qrCodeMessage => {
+                // stop scanner and hide overlay
+                html5QrCode.stop().then(() => {
+                  document.getElementById("scanner-overlay").style.display = "none";
+
+                  // --- parse QR payload if needed ---
+                  // If QR contains both order and code (e.g. "ORDER|CODE" or "ORDER,CODE"), handle split:
+                  let payload = (qrCodeMessage || '').trim();
+                  let orderVal = payload;
+                  let codeVal = '';
+
+                  if (payload.includes('|')) {
+                    [orderVal, codeVal] = payload.split('|').map(s => s.trim());
+                  } else if (payload.includes(',')) {
+                    [orderVal, codeVal] = payload.split(',').map(s => s.trim());
+                  } else {
+                    // QR only had order number — user should input access code manually.
+                    orderVal = payload;
+                  }
+
+                  document.getElementById("orderNumber").value = orderVal || '';
+                  if (codeVal) document.getElementById("accessCode").value = codeVal;
+                  document.getElementById("scanTime").value = new Date().toISOString();
+                  getLocation();
+
+                  showMessage("Checking status...", "success");
+
+                  // Grab values from DOM and pass to server
+                  const on = document.getElementById("orderNumber").value.trim();
+                  const ac = document.getElementById("accessCode").value.trim();
+
+                  google.script.run.withSuccessHandler(response => {
+                    const status = (response && response.status) ? String(response.status).toLowerCase() : '';
+                    if (status.includes('cancel')) {
+                      showMessage("Order is Cancelled.", "error");
+                      return;
+                    }
+                    if (status.includes('out')) {
+                      // OK to proceed — leave it to user to press Submit (or optionally auto-call submitDelivery())
+                      showMessage("Ready to mark as delivered.", "success");
+                      return;
+                    } else if (status.includes('deliver')) {
+                      showMessage("Already delivered.", "error");
+                      return;
+                    } else {
+                      showMessage("Status not eligible: " + (response && response.status ? response.status : 'Unknown'), "error");
+                    }
+                  }).checkOrderStatus(on, ac);
+
+                }).catch(err => {
+                  showMessage("Camera stop error.", "error");
+                  document.getElementById("scanner-overlay").style.display = "none";
+                });
+              },
+              errorMessage => { /* ignore decode errors */ }
+            ).catch(err => {
+              document.getElementById("scanner-overlay").style.display = "none";
+              showMessage("Camera start error: " + err, "error");
+            });
+          } else {
+            document.getElementById("scanner-overlay").style.display = "none";
+            showMessage("No camera found.", "error");
+          }
+        }).catch(err => {
+          document.getElementById("scanner-overlay").style.display = "none";
+          showMessage("Camera error: " + err, "error");
+        });
+      }
+
+      function cancelScan() {
+        if (html5QrCode) {
+          html5QrCode.stop().then(() => {
+            document.getElementById("scanner-overlay").style.display = "none";
+          }).catch(err => {
+            showMessage("Failed to stop scanner.", "error");
+            document.getElementById("scanner-overlay").style.display = "none";
+          });
+        } else {
+          document.getElementById("scanner-overlay").style.display = "none";
+        }
+      }
+
+      function submitDelivery() {
+        const orderNumber = document.getElementById("orderNumber").value.trim();
+        const accessCode = document.getElementById("accessCode").value.trim();
+        const scanTime = document.getElementById("scanTime").value;
+        const locationData = document.getElementById("locationData").value;
+
+        if (!orderNumber || !accessCode) {
+          showMessage("Order & code required.", "error");
+          return;
+        }
+
+        showMessage("Validating order...", "success");
+
+        // Use case-insensitive checks so minor capitalization differences don't break flows
+        google.script.run.withSuccessHandler(response => {
+          const status = (response && response.status) ? String(response.status).toLowerCase() : '';
+
+          if (status.includes('out')) {
+            // Proceed to mark as delivered
+            google.script.run.withSuccessHandler(updateResponse => {
+              if (updateResponse && updateResponse.success) {
+                showMessage("Marked as delivered.", "success");
+              } else {
+                showMessage(updateResponse && updateResponse.message ? updateResponse.message : "Failed to mark as delivered.", "error");
+              }
+            }).markAsDelivered(orderNumber, accessCode);
+          } else if (status.includes('deliver')) {
+            showMessage("Already delivered.", "error");
+          } else if (status.includes('cancel')) {
+            showMessage("Order is cancelled.", "error");
+          } else {
+            showMessage("Status: " + (response && response.status ? response.status : "Unknown"), "error");
+          }
+        }).checkOrderStatus(orderNumber, accessCode);
+      }
+    </script>
+  </body>
 </html>
