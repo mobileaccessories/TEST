@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover" />
-<title>Passcode — Minimal Black & White</title>
+<title>Passcode + QR — Mark Delivered</title>
+
 <style>
 :root {
   --pass-len: 6;
@@ -16,252 +17,400 @@
   --muted: rgba(0,0,0,0.35);
 }
 
-/* Reset + prevent scroll + disable selection */
-* { 
-  box-sizing:border-box; 
-  -webkit-tap-highlight-color:transparent; 
-  user-select: none; /* disable selection */
-  -webkit-user-select: none;
-  -ms-user-select: none;
-}
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: -apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  background: var(--bg);
-  color: var(--fg);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: none;
-  -ms-touch-action: none;
-  overscroll-behavior: none;
-}
-
-/* Container */
-.device {
-  width: 100vw;
-  max-width: 420px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  box-sizing: border-box;
-}
+/* Reset + prevent scroll + selection */
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; -ms-user-select:none; }
+html, body { height:100%; margin:0; font-family:-apple-system,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); overflow:hidden; display:flex; align-items:center; justify-content:center; touch-action:none; }
+.device { width:100vw; max-width:420px; height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; box-sizing:border-box; }
 
 /* Title + Subtitle */
-.title {
-  font-size: 22px;
-  font-weight: 600;
-  text-align: center;
-}
-.subtitle {
-  font-size: 14px;
-  color: var(--muted);
-  text-align: center;
-  margin-top: 4px;
-}
+.title { font-size:22px; font-weight:600; text-align:center; }
+.subtitle { font-size:14px; color:var(--muted); text-align:center; margin-top:4px; }
 
 /* Dots */
-.dots {
-  display: flex;
-  justify-content: center;
-  gap: var(--dot-gap);
-  margin: 25px 0;
-}
-.dot {
-  width: var(--dot-size);
-  height: var(--dot-size);
-  border-radius: 50%;
-  border: 1px solid var(--muted);
-  background: transparent;
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-.dot.filled {
-  background: var(--fg);
-  transform: scale(1.2);
-}
+.dots { display:flex; justify-content:center; gap:var(--dot-gap); margin:20px 0 10px; }
+.dot { width:var(--dot-size); height:var(--dot-size); border-radius:50%; border:1px solid var(--muted); background:transparent; transition:transform .15s ease, background .15s ease; }
+.dot.filled { background:var(--fg); transform:scale(1.2); }
 
-/* Info text */
-.info {
-  color: var(--muted);
-  font-size: 13px;
-  min-height: 20px;
-  text-align: center;
-  margin-bottom: 20px;
-}
+/* Info and status */
+.info { color:var(--muted); font-size:13px; min-height:20px; text-align:center; margin-bottom:14px; }
+#status { min-height:44px; margin-top:10px; width:100%; text-align:center; }
 
 /* Keypad */
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3, var(--key-size));
-  grid-template-rows: repeat(4, var(--key-size));
-  gap: var(--key-gap);
-  justify-content: center;
-  margin-bottom: 20px;
-}
-.key {
-  width: var(--key-size);
-  height: var(--key-size);
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0,0,0,0.05);
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.15s;
-}
-.key:active {
-  background: rgba(0,0,0,0.15);
-}
-.num {
-  font-size: 22px;
-  font-weight: 500;
-}
-.letters {
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 2px;
-}
+.keypad { display:grid; grid-template-columns:repeat(3, var(--key-size)); grid-template-rows:repeat(4, var(--key-size)); gap:var(--key-gap); justify-content:center; margin-bottom:18px; }
+.key { width:var(--key-size); height:var(--key-size); border-radius:50%; display:flex; flex-direction:column; justify-content:center; align-items:center; background: rgba(0,0,0,0.05); cursor:pointer; user-select:none; transition:background .12s; border: none; }
+.key:active { background: rgba(0,0,0,0.15); }
+.num { font-size:22px; font-weight:500; }
+.letters { font-size:10px; color:var(--muted); margin-top:2px; }
 
-/* Bottom buttons */
-.bottom-row {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 10px;
-}
-.btn-text {
-  color: var(--muted);
-  font-size: 14px;
-  background: rgba(0,0,0,0.05);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
+/* Bottom row */
+.bottom-row { width:100%; display:flex; justify-content:space-between; padding:0 10px; margin-top:6px; }
+.btn-text { color:var(--muted); font-size:14px; background:rgba(0,0,0,0.05); border:none; padding:8px 16px; border-radius:10px; cursor:pointer; transition:background .12s; }
 .btn-text:active { background: rgba(0,0,0,0.15); }
-.btn-cancel { font-weight: 600; }
+.btn-cancel { font-weight:600; }
 
-/* Responsive adjustments for very small screens */
-@media (max-width: 360px) {
-  :root {
-    --key-size: 60px;
-    --dot-size: 10px;
-    --dot-gap: 12px;
-  }
-  .num { font-size: 18px; }
-  .letters { font-size: 8px; }
-  .title { font-size: 20px; }
-  .subtitle, .info { font-size: 12px; }
-  .btn-text { font-size: 12px; padding: 6px 12px; }
+/* Scanner overlay */
+#scanner-overlay { position:fixed; top:0; left:0; width:100vw; height:100vh; display:none; align-items:center; justify-content:center; z-index:1000; background:rgba(0,0,0,0.6); padding:20px; box-sizing:border-box; }
+#scanner-card { width:90vw; max-width:420px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.35); display:flex; flex-direction:column; align-items:center; padding:12px; }
+#reader { width:100%; height:320px; background:#000; border-radius:12px; overflow:hidden; }
+.scan-controls { width:100%; display:flex; gap:10px; margin-top:12px; }
+.scan-controls button { flex:1; padding:12px; border-radius:999px; border:none; cursor:pointer; font-weight:600; }
+
+/* Action colors */
+.btn-scan-cancel { background:#ff4444; color:#fff; }
+.btn-scan-cancel:active { background:#cc0000; }
+.btn-scan-back { background:#f3f4f6; color:#000; }
+
+/* Small responsive tweaks */
+@media (max-width:360px) {
+  :root { --key-size:60px; --dot-size:10px; --dot-gap:12px; }
+  .num{ font-size:18px; }
+  .title{ font-size:20px; }
 }
+.hidden { display:none !important; }
+.small { font-size:13px; color:var(--muted); text-align:center; margin-top:6px; }
+.disabled { opacity:0.6; pointer-events:none; }
+
 </style>
 </head>
 <body>
-<div class="device">
-  <div class="title">Enter Passcode</div>
-  <div class="subtitle">Your passcode is required to access the QR scanner</div>
-  <div class="dots" id="dots"></div>
-  <div class="info" id="info">Tap the digits</div>
-  <div class="keypad" id="keypad"></div>
-  <div class="bottom-row">
-    <button id="emergencyBtn" class="btn-text">Emergency</button>
-    <button id="cancelBtn" class="btn-text btn-cancel">Cancel</button>
+  <div class="device" id="container">
+    <div id="pass-screen">
+      <div class="title">Enter Passcode</div>
+      <div class="subtitle">Your passcode is required to access the QR scanner</div>
+
+      <div class="dots" id="dots"></div>
+      <div class="info" id="info">Tap the digits</div>
+
+      <div class="keypad" id="keypad"></div>
+
+      <div class="bottom-row">
+        <button id="emergencyBtn" class="btn-text">Emergency</button>
+        <button id="clearBtn" class="btn-text btn-cancel">Clear</button>
+      </div>
+
+      <div id="status" class="small"></div>
+    </div>
   </div>
-</div>
 
-<script>
-// Prevent scrolling & zooming
-document.body.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
-document.addEventListener('gesturestart', e => e.preventDefault());
+  <!-- Scanner overlay -->
+  <div id="scanner-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="scanner-card">
+      <div id="reader"></div>
+      <div class="scan-controls">
+        <button id="backToPass" class="btn-scan-back">Back</button>
+        <button id="cancelScanBtn" class="btn-scan-cancel">Cancel</button>
+      </div>
+      <div id="scanHint" class="small" style="margin-top:8px;">Point camera at the QR code</div>
+    </div>
+  </div>
 
-// Disable right-click, copy, select
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('copy', e => e.preventDefault());
-document.addEventListener('cut', e => e.preventDefault());
-document.addEventListener('selectstart', e => e.preventDefault());
-document.addEventListener('keydown', e => {
-  if(e.ctrlKey || e.metaKey || e.key==='F12') e.preventDefault(); // disable Ctrl/Cmd + keys
-});
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+  (function(){
+    // Basic anti-scroll & selection protections
+    document.body.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('cut', e => e.preventDefault());
+    document.addEventListener('selectstart', e => e.preventDefault());
 
-// Config
-const PASS_LEN = 6;
-const keypad = document.getElementById('keypad');
-const dots = document.getElementById('dots');
-const cancelBtn = document.getElementById('cancelBtn');
-let entry='';
+    // Config
+    const PASS_LEN = 6;
+    const KEYS = [
+      {n:'1',l:''},{n:'2',l:'ABC'},{n:'3',l:'DEF'},
+      {n:'4',l:'GHI'},{n:'5',l:'JKL'},{n:'6',l:'MNO'},
+      {n:'7',l:'PQRS'},{n:'8',l:'TUV'},{n:'9',l:'WXYZ'},
+      // placeholders will be inserted to place 0 in center bottom
+    ];
 
-// Build dots
-for(let i=0;i<PASS_LEN;i++){
-  const d = document.createElement('div');
-  d.className='dot';
-  dots.appendChild(d);
-}
+    // Elements
+    const keypad = document.getElementById('keypad');
+    const dots = document.getElementById('dots');
+    const clearBtn = document.getElementById('clearBtn');
+    const emergencyBtn = document.getElementById('emergencyBtn');
+    const infoEl = document.getElementById('info');
+    const statusEl = document.getElementById('status');
+    const scannerOverlay = document.getElementById('scanner-overlay');
+    const readerEl = document.getElementById('reader');
+    const backToPassBtn = document.getElementById('backToPass');
+    const cancelScanBtn = document.getElementById('cancelScanBtn');
 
-// Keys
-const KEYS = [
-  {n:'1',l:''},{n:'2',l:'ABC'},{n:'3',l:'DEF'},
-  {n:'4',l:'GHI'},{n:'5',l:'JKL'},{n:'6',l:'MNO'},
-  {n:'7',l:'PQRS'},{n:'8',l:'TUV'},{n:'9',l:'WXYZ'},
-  {n:'0',l:''} 
-];
-const frag = document.createDocumentFragment();
+    let entry = '';
+    let html5QrCode = null;
+    let inFlight = false;
+    let locationPromise = null;
 
-// Numbers 1-9
-for(let i=0;i<9;i++){
-  const k = KEYS[i];
-  const btn = document.createElement('button');
-  btn.type='button';
-  btn.className='key';
-  btn.innerHTML=`<div class="num">${k.n}</div><div class="letters">${k.l}</div>`;
-  frag.appendChild(btn);
-}
+    // Build dots
+    for(let i=0;i<PASS_LEN;i++){
+      const d = document.createElement('div'); d.className='dot'; dots.appendChild(d);
+    }
 
-// Placeholder left for bottom row
-frag.appendChild(document.createElement('div'));
+    // Build keypad: 1..9
+    const frag = document.createDocumentFragment();
+    for(let i=0;i<9;i++){
+      const k = KEYS[i];
+      const btn = document.createElement('button');
+      btn.type='button';
+      btn.className='key';
+      btn.setAttribute('data-num', k.n);
+      btn.innerHTML = `<div class="num">${k.n}</div><div class="letters">${k.l}</div>`;
+      frag.appendChild(btn);
+    }
+    // left placeholder
+    frag.appendChild(document.createElement('div'));
+    // 0 button
+    const zeroKey = document.createElement('button');
+    zeroKey.type='button';
+    zeroKey.className='key';
+    zeroKey.setAttribute('data-num', '0');
+    zeroKey.innerHTML = `<div class="num">0</div><div class="letters"></div>`;
+    frag.appendChild(zeroKey);
+    // right placeholder
+    frag.appendChild(document.createElement('div'));
 
-// 0 in center
-const zeroKey = document.createElement('button');
-zeroKey.type='button';
-zeroKey.className='key';
-zeroKey.innerHTML=`<div class="num">0</div><div class="letters"></div>`;
-frag.appendChild(zeroKey);
+    keypad.appendChild(frag);
 
-// Placeholder right
-frag.appendChild(document.createElement('div'));
+    function updateDots(){
+      Array.from(dots.children).forEach((d,i)=>{
+        d.classList.toggle('filled', i<entry.length);
+      });
+    }
 
-keypad.appendChild(frag);
+    function setStatus(msg, colorClass = '') {
+      statusEl.textContent = msg || '';
+      statusEl.className = colorClass ? colorClass : '';
+    }
 
-// Update dots
-function updateDots(){
-  Array.from(dots.children).forEach((d,i)=>{
-    d.classList.toggle('filled', i<entry.length);
-  });
-}
+    // Quick location promise (non-blocking long)
+    function getLocationPromise(timeoutMs = 2000) {
+      if (locationPromise) return locationPromise;
+      locationPromise = new Promise(resolve => {
+        if (!navigator.geolocation) return resolve(null);
+        let done=false;
+        const t = setTimeout(()=>{ if(!done){ done=true; resolve(null); } }, timeoutMs);
+        navigator.geolocation.getCurrentPosition(pos=>{
+          if (done) return;
+          done=true; clearTimeout(t);
+          resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        }, err=>{
+          if (done) return;
+          done=true; clearTimeout(t);
+          resolve(null);
+        }, { enableHighAccuracy:false, timeout: timeoutMs });
+      });
+      return locationPromise;
+    }
+    function resetLocationPromise(){ locationPromise = null; }
 
-// Key input
-keypad.addEventListener('pointerdown', (ev)=>{
-  ev.preventDefault();
-  const btn = ev.target.closest('.key'); if(!btn) return;
-  const numEl = btn.querySelector('.num'); if(!numEl) return;
-  if(entry.length>=PASS_LEN) return;
-  entry += numEl.textContent;
-  updateDots();
-});
+    // Disable/enable UI during network ops
+    function setInFlight(val){
+      inFlight = !!val;
+      if (inFlight) {
+        // visually disable keys
+        keypad.classList.add('disabled');
+        clearBtn.disabled = true;
+        emergencyBtn.disabled = true;
+      } else {
+        keypad.classList.remove('disabled');
+        clearBtn.disabled = false;
+        emergencyBtn.disabled = false;
+      }
+    }
 
-// Cancel clears entry
-cancelBtn.addEventListener('pointerdown', (ev)=>{
-  ev.preventDefault();
-  entry='';
-  updateDots();
-});
-</script>
+    // Handle keypad input (pointer down)
+    keypad.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      if (inFlight) return;
+      const btn = ev.target.closest('.key'); if(!btn) return;
+      const n = btn.getAttribute('data-num'); if(!n) return;
+      if (entry.length >= PASS_LEN) return;
+      entry += n;
+      updateDots();
+      setStatus('');
+      if (entry.length === PASS_LEN) {
+        // small delay for UX, then show scanner
+        setStatus('Passcode entered — opening scanner…');
+        setTimeout(()=> openScannerWithPass(entry), 300);
+      }
+    });
+
+    clearBtn.addEventListener('click', (e)=>{
+      e.preventDefault(); if (inFlight) return;
+      entry = ''; updateDots(); setStatus('');
+    });
+
+    emergencyBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      // You can add emergency flow here (call server or show instructions)
+      setStatus('Emergency pressed — implement as needed', '');
+    });
+
+    // Open scanner (show overlay) and start html5-qrcode
+    function openScannerWithPass(passcode) {
+      resetLocationPromise();
+      scannerOverlay.style.display = 'flex';
+      scannerOverlay.setAttribute('aria-hidden','false');
+      startScanner(passcode);
+    }
+
+    // Stop and clear scanner
+    function stopAndClearScanner(){
+      if (!html5QrCode) {
+        scannerOverlay.style.display = 'none';
+        scannerOverlay.setAttribute('aria-hidden','true');
+        return Promise.resolve();
+      }
+      return html5QrCode.stop().catch(()=>{}).then(()=>{
+        try { html5QrCode.clear(); } catch(e){}
+        html5QrCode = null;
+        scannerOverlay.style.display = 'none';
+        scannerOverlay.setAttribute('aria-hidden','true');
+      });
+    }
+
+    // Scanner callbacks
+    function onScanSuccess(qrMessage, passcode) {
+      // Ensure we stop scanner immediately
+      stopAndClearScanner().then(()=>{
+        // parse payload to get order number — if QR contains code we prefer user-entered passcode
+        const payload = (qrMessage || '').trim();
+        let orderVal = payload;
+        if (payload.includes('|')) {
+          [orderVal] = payload.split('|').map(s=>s.trim());
+        } else if (payload.includes(',')) {
+          [orderVal] = payload.split(',').map(s=>s.trim());
+        }
+        orderVal = (orderVal || '').trim();
+        if (!orderVal) {
+          setStatus('QR did not contain a valid order identifier', 'error');
+          return;
+        }
+
+        const scanTime = new Date().toISOString();
+        setStatus('Got QR — validating...', ''); setInFlight(true);
+
+        // Attempt quick geolocation but don't wait long
+        getLocationPromise(2000).then(coords=>{
+          const locStr = coords ? JSON.stringify(coords) : '';
+          // First check status
+          google.script.run
+            .withSuccessHandler(checkResp=>{
+              // Expected shapes: checkOrderStatus returns { error: true/message } or { error:false, status, canonicalStatus, ... }
+              if (!checkResp) {
+                setStatus('Empty response from server when checking order', 'error'); setInFlight(false); return;
+              }
+              if (checkResp.error) {
+                setStatus(checkResp.message || 'Error checking order', 'error'); setInFlight(false); return;
+              }
+              const canonical = (checkResp.canonicalStatus || '').toString().toLowerCase();
+              const statusText = (checkResp.status || checkResp.message || '').toString().toLowerCase();
+
+              if (canonical === 'out for delivery' || statusText.indexOf('out') !== -1) {
+                // proceed to mark delivered
+                setStatus('Marking as delivered...', '');
+                google.script.run
+                  .withSuccessHandler(markResp=>{
+                    if (markResp && markResp.success) {
+                      setStatus('Order marked as delivered ✅', 'success');
+                      // reset UI
+                      entry = ''; updateDots(); resetLocationPromise();
+                    } else {
+                      const msg = (markResp && (markResp.message || markResp.error)) || 'Failed to mark delivered';
+                      setStatus(msg, 'error');
+                    }
+                    setInFlight(false);
+                  })
+                  .withFailureHandler(err=>{
+                    setStatus('Server error while marking delivered: ' + (err && err.message ? err.message : err), 'error');
+                    setInFlight(false);
+                  })
+                  .markAsDelivered(orderVal, passcode, scanTime, locStr);
+              } else if (canonical === 'delivered' || statusText.indexOf('deliver') !== -1) {
+                setStatus('Order already delivered', 'error'); setInFlight(false);
+              } else if (canonical === 'cancelled' || statusText.indexOf('cancel') !== -1) {
+                setStatus('Order cancelled', 'error'); setInFlight(false);
+              } else {
+                setStatus('Status not eligible: ' + (checkResp.status || 'Unknown'), 'error'); setInFlight(false);
+              }
+            })
+            .withFailureHandler(err=>{
+              setStatus('Server error checking order: ' + (err && err.message ? err.message : err), 'error'); setInFlight(false);
+            })
+            .checkOrderStatus(orderVal, passcode);
+        });
+      });
+    }
+
+    function startScanner(passcode) {
+      if (html5QrCode) return; // already running
+      html5QrCode = new Html5Qrcode("reader");
+      Html5Qrcode.getCameras().then(devices=>{
+        if (!devices || devices.length === 0) {
+          setStatus('No camera found', 'error');
+          scannerOverlay.style.display = 'none';
+          html5QrCode = null;
+          return;
+        }
+
+        const config = { fps:10, qrbox: function (viewWidth, viewHeight) { const m = Math.min(viewWidth, viewHeight); return { width: Math.floor(m*0.9), height: Math.floor(m*0.6) }; } };
+
+        html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          qrMessage => {
+            // Successful decode — handle
+            onScanSuccess(qrMessage, passcode);
+          },
+          decodeError => {
+            // ignore transient decode errors
+          }
+        ).catch(err=>{
+          setStatus('Unable to start camera: ' + (err && err.message ? err.message : err), 'error');
+          scannerOverlay.style.display = 'none';
+          html5QrCode = null;
+        });
+      }).catch(err=>{
+        setStatus('Camera access error: ' + (err && err.message ? err.message : err), 'error');
+        scannerOverlay.style.display = 'none';
+        html5QrCode = null;
+      });
+    }
+
+    // Back to passcode (stop scanner)
+    backToPassBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      stopAndClearScanner().then(()=> {
+        entry = ''; updateDots(); setStatus('');
+      });
+    });
+
+    cancelScanBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      stopAndClearScanner().then(()=>{
+        entry = ''; updateDots(); setStatus('Scan cancelled', '');
+      });
+    });
+
+    // Prevent accidental page unload while inFlight
+    window.addEventListener('beforeunload', (e) => {
+      if (inFlight) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // Small helpers to show temporary messages in status element with optional class
+    function setStatus(msg, cls){
+      statusEl.textContent = msg || '';
+      statusEl.className = cls || '';
+    }
+
+    // Initialize
+    updateDots();
+    setStatus('Enter your 6-digit passcode', '');
+
+  })();
+  </script>
 </body>
 </html>
